@@ -1,5 +1,6 @@
 package com.example.jerry.healthmonitor2;
 
+import android.Manifest;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.WatchViewStub;
 import android.support.wearable.view.WearableListView;
@@ -46,6 +48,8 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private String nodeId;
     private SensorManager mSensorManager;
     private Sensor mHeartRateSensor;
+
+    SensorEventListener heartListener;
     private TextView heartRateText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         setContentView(R.layout.activity_main);
 
         initApi();
-
+        setAmbientEnabled();
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -61,10 +65,11 @@ public class MainActivity extends WearableActivity implements SensorEventListene
                 setupWidgets();
             }
         });
-        //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BODY_SENSORS}, 1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BODY_SENSORS}, 1);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mHeartRateSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        //heartListener = new heartListener();
         heartRateText = (TextView) findViewById(R.id.heartRateText);
     }
 
@@ -92,18 +97,85 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//        //Print all the sensors
-//        if (mHeartRateSensor == null) {
-//            List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-//            for (Sensor sensor1 : sensors) {
-//                Log.i("Sensor list", sensor1.getName() + ": " + sensor1.getType());
-//            }
-//        }
-//    }
+    //onResume() register the accelerometer for listening the events
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //sensorManager.registerListener(oriL, oriSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(accL, accSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        //sensorManager.registerListener(pedoL, pedoSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+
+    }
+
+    private class pedoListener implements SensorEventListener {
+        public void onSensorChanged(SensorEvent event) {
+
+            //Log.i("SENSOR", "Acceleration changed.");
+            //Log.i("SENSOR", "  Acceleration X: " + event.values[0]
+            //        + ", Acceleration Y: " + event.values[1]
+            //        + ", Acceleration Z: " + event.values[2]);
+            String val = new String();
+            val = "pedo: " + String.valueOf(event.values[0]).substring(0,3);
+            Log.i("SENSOR", "Acceleration changed. : " + event.values[0]);
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    }
+
+    private class accListener implements SensorEventListener {
+        public void onSensorChanged(SensorEvent event) {
+
+            //Log.i("SENSOR", "Acceleration changed.");
+            //Log.i("SENSOR", "  Acceleration X: " + event.values[0]
+            //        + ", Acceleration Y: " + event.values[1]
+            //        + ", Acceleration Z: " + event.values[2]);
+            String val = new String();
+            val = "Acc X: " + String.valueOf(event.values[0]).substring(0,3)
+                    + "/Y: " + String.valueOf(event.values[1]).substring(0,3)
+                    + "/Z: " + String.valueOf(event.values[2]).substring(0,3);
+            //acc.setText(val);
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    }
+
+    private class oriListener implements SensorEventListener {
+        public void onSensorChanged(SensorEvent event) {
+
+            //Log.i("SENSOR", "Orientation changed.");
+            //Log.i("SENSOR", "  Orientation X: " + event.values[0]
+            //        + ", Orientation Y: " + event.values[1]
+            //        + ", Orientation Z: " + event.values[2]);
+            String val = new String();
+            val = "ori X: " + String.valueOf(event.values[0]).substring(0,3)
+                    + "/Y: " + String.valueOf(event.values[1]).substring(0,3)
+                    + "/Z: " + String.valueOf(event.values[2]).substring(0,3);
+            //ori.setText(val);
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    }
+
+    private class heartListener implements SensorEventListener {
+        public void onSensorChanged(SensorEvent event) {
+
+            float mHeartRateFloat = event.values[0];
+
+            int mHeartRate = Math.round(mHeartRateFloat);
+
+            //mTextView.setText(Integer.toString(mHeartRate));
+            heartRateText.setText(Integer.toString(mHeartRate));
+        }
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    }
 
     @Override
     protected void onPause() {
@@ -166,6 +238,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
      * Sends a message to the connected mobile device, telling it to show a Toast.
      */
     private void sendToast() {
+        onResume();
         Wearable.getMessageClient(this).sendMessage("message", MESSAGE, new byte[5]);
         //Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(request);
     }
