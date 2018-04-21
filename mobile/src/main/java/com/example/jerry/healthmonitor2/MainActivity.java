@@ -13,6 +13,8 @@ import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.DataClient;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
@@ -21,14 +23,15 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static android.util.Config.LOGD;
 
-public class MainActivity extends AppCompatActivity implements MessageClient.OnMessageReceivedListener {
+public class MainActivity extends AppCompatActivity implements MessageClient.OnMessageReceivedListener, DataClient.OnDataChangedListener {
     private static final long CONNECTION_TIME_OUT_MS = 100;
-    private static final String MESSAGE = "Hello Wear!";
 
     private GoogleApiClient client;
     private String nodeId;
@@ -38,24 +41,9 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListenerService ls = new ListenerService();
-        ls.onCreate();
         main = (TextView) findViewById(R.id.helloworld);
-        WearableListenerService wls = new WearableListenerService(){
-            @Override
-            public void onMessageReceived(MessageEvent messageEvent) {
-                showToast(messageEvent.getPath());
-            }
-
-            private void showToast(String message) {
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-                main.setText(message);
-            }
-        };
-        wls.onCreate();
 
         initApi();
-
     }
 
     /**
@@ -114,5 +102,19 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         /*LOGD(TAG, "onMessageReceived() A message from watch was received:"
                 + messageEvent.getRequestId() + " " + messageEvent.getPath());*/
         main.setText(messageEvent.getPath());
+    }
+
+    @Override
+    public void onDataChanged(final DataEventBuffer dataEventBuffer) {
+        /*LOGD(TAG, "onMessageReceived() A message from watch was received:"
+                + messageEvent.getRequestId() + " " + messageEvent.getPath());*/
+
+        Iterator<DataEvent> iterator = dataEventBuffer.iterator();
+        List<DataEvent> list = new ArrayList<DataEvent>();
+        while(iterator.hasNext())
+        {
+            list.add(iterator.next());
+        }
+        main.setText(list.get(0).getDataItem().toString());
     }
 }

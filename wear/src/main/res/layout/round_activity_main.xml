@@ -1,15 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    tools:deviceIds="wear">
+    tools:deviceIds="wear"
+    android:background = "@color/white">
+    <TextView
+        android:id="@+id/heartRateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_above = "@id/bpmText"
+        android:text="--"
+        android:textColor="@color/red"
+        android:textSize="20dp" />
 
+    <TextView
+        android:id="@+id/bpmText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bpm"
+        android:textColor="@color/black"
+        android:layout_above="@id/btn_toast"
+        android:layout_marginLeft="3dp"
+        android:layout_centerHorizontal="true"
+        android:textSize="15dp"/>
     <Button
         android:id="@+id/btn_toast"
-        android:layout_width="wrap_content"
-        android:layout_height="96dp"
+        android:layout_width="101dp"
+        android:layout_height="67dp"
         android:layout_gravity="center"
-        android:text="Send toast"/>
-</FrameLayout>
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text="Send toast"
+        android:textSize="15dp" />
+</RelativeLayout>

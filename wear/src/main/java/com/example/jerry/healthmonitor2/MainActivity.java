@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,14 +37,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends WearableActivity {
+public class MainActivity extends WearableActivity implements SensorEventListener {
 
     private static final long CONNECTION_TIME_OUT_MS = 100;
     private static final String MESSAGE = "Hello Wear!";
 
     private GoogleApiClient client;
     private String nodeId;
-
+    private SensorManager mSensorManager;
+    private Sensor mHeartRateSensor;
+    private TextView heartRateText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +61,54 @@ public class MainActivity extends WearableActivity {
                 setupWidgets();
             }
         });
+        //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BODY_SENSORS}, 1);
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mHeartRateSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        heartRateText = (TextView) findViewById(R.id.heartRateText);
+    }
+
+    private void startMeasure() {
+        boolean sensorRegistered = mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        Log.d("Sensor Status:", " Sensor registered: " + (sensorRegistered ? "yes" : "no"));
+    }
+
+    private void stopMeasure() {
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float mHeartRateFloat = event.values[0];
+
+        int mHeartRate = Math.round(mHeartRateFloat);
+
+        //mTextView.setText(Integer.toString(mHeartRate));
+        heartRateText.setText(Integer.toString(mHeartRate));
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//
+//        //Print all the sensors
+//        if (mHeartRateSensor == null) {
+//            List<Sensor> sensors = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+//            for (Sensor sensor1 : sensors) {
+//                Log.i("Sensor list", sensor1.getName() + ": " + sensor1.getType());
+//            }
+//        }
+//    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
     }
 
     /**
@@ -115,61 +166,8 @@ public class MainActivity extends WearableActivity {
      * Sends a message to the connected mobile device, telling it to show a Toast.
      */
     private void sendToast() {
-        if (nodeId != null) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    client.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
-                    Wearable.MessageApi.sendMessage(client, nodeId, MESSAGE, null);
-                    client.disconnect();
-                }
-            }).start();
-        }
-        Wearable.getMessageClient(this).sendMessage("message", "two", new byte[5]);
+        Wearable.getMessageClient(this).sendMessage("message", MESSAGE, new byte[5]);
         //Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(request);
-        MessageApi m = new MessageApi() {
-            @Override
-            public PendingResult<SendMessageResult> sendMessage(GoogleApiClient googleApiClient, String s, String s1, byte[] bytes) {
-                return null;
-            }
-
-            @Override
-            public PendingResult<Status> addListener(GoogleApiClient googleApiClient, MessageListener messageListener) {
-                return null;
-            }
-
-            @Override
-            public PendingResult<Status> addListener(GoogleApiClient googleApiClient, MessageListener messageListener, Uri uri, int i) {
-                return null;
-            }
-
-            @Override
-            public PendingResult<Status> removeListener(GoogleApiClient googleApiClient, MessageListener messageListener) {
-                return null;
-            }
-        };
-        m.sendMessage(client, "message", "two", new byte[5]);
-        /*MessageClient messageClient = new MessageClient() {
-            @Override
-            public Task<Integer> sendMessage(@NonNull String s, @NonNull String s1, @Nullable byte[] bytes) {
-                return null;
-            }
-
-            @Override
-            public Task<Void> addListener(@NonNull OnMessageReceivedListener onMessageReceivedListener) {
-                return null;
-            }
-
-            @Override
-            public Task<Void> addListener(@NonNull OnMessageReceivedListener onMessageReceivedListener, @NonNull Uri uri, int i) {
-                return null;
-            }
-
-            @Override
-            public Task<Boolean> removeListener(@NonNull OnMessageReceivedListener onMessageReceivedListener) {
-                return null;
-            }
-        };*/
     }
 
 }
