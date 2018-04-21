@@ -1,7 +1,10 @@
 package com.example.jerry.healthmonitor2;
 
+import android.Manifest;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -23,7 +26,10 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,15 +42,57 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     private GoogleApiClient client;
     private String nodeId;
     private static final String TAG = "MainActivity";
+    private ArrayList<String> readings;
     TextView main;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         main = (TextView) findViewById(R.id.helloworld);
-
+        readings = new ArrayList<String>();
         initApi();
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+
     }
+
+    // Check if external storage is available to read and write
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return (Environment.MEDIA_MOUNTED.equals(state));
+    }
+    public void saveData(View view) {
+        try {
+            String externalfilename = "HeartRateData.txt";
+            if (isExternalStorageWritable()) {
+            } else {
+                main.setText("not writable");
+            }
+            File file = Environment.getExternalStorageDirectory();
+            File newFile = new File(file, "Wearable App");
+            if (!newFile.exists()) {
+                newFile.mkdirs();
+            }
+         /*int variable = 0;
+         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+         {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, variable);
+         }*/
+            File textFile = new File(newFile, externalfilename);
+            FileWriter writer = new FileWriter(textFile, true);
+            for(int x=0;x<readings.size();x++) {
+                writer.append(readings.get(x) + "\n");
+            }
+            writer.flush();
+            writer.close();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Initializes the GoogleApiClient and gets the Node ID of the connected device.
@@ -102,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         /*LOGD(TAG, "onMessageReceived() A message from watch was received:"
                 + messageEvent.getRequestId() + " " + messageEvent.getPath());*/
         main.setText(messageEvent.getPath());
+        readings.add(messageEvent.getPath());
     }
 
     @Override
