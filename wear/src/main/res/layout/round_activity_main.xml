@@ -23,17 +23,28 @@
         android:layout_height="wrap_content"
         android:text="bpm"
         android:textColor="@color/black"
-        android:layout_above="@id/btn_toast"
+        android:layout_above="@id/btn_send"
         android:layout_marginLeft="3dp"
         android:layout_centerHorizontal="true"
         android:textSize="15dp"/>
     <Button
-        android:id="@+id/btn_toast"
+        android:id="@+id/btn_send"
         android:layout_width="101dp"
         android:layout_height="67dp"
         android:layout_gravity="center"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:text="Send data"
+        android:textSize="15dp" />
+
+    <Button
+        android:id="@+id/btn_stop"
+        android:layout_width="101dp"
+        android:layout_height="67dp"
+        android:layout_gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:text="Stop data"
+        android:visibility="invisible"
         android:textSize="15dp" />
 </RelativeLayout>

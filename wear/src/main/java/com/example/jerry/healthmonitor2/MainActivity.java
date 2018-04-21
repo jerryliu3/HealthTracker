@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,63 +40,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends WearableActivity implements SensorEventListener {
+public class MainActivity extends WearableActivity implements View.OnClickListener{
 
     private static final long CONNECTION_TIME_OUT_MS = 100;
-    private static final String MESSAGE = "Hello Wear!";
 
     private GoogleApiClient client;
     private String nodeId;
     private SensorManager mSensorManager;
     private Sensor mHeartRateSensor;
-
-    SensorEventListener heartListener;
+    private SensorEventListener heartListener;
     private TextView heartRateText;
+
+    private Button send;
+    private Button stop;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.round_activity_main);
 
         initApi();
         setAmbientEnabled();
-        final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
-        stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
-            @Override
-            public void onLayoutInflated(WatchViewStub stub) {
-                setupWidgets();
-            }
-        });
+
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BODY_SENSORS}, 1);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mHeartRateSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
-        //heartListener = new heartListener();
+        heartListener = new heartListener();
         heartRateText = (TextView) findViewById(R.id.heartRateText);
+
+        send = (Button) findViewById(R.id.btn_send);
+        send.setOnClickListener(this);
+        stop = (Button) findViewById(R.id.btn_stop);
+        stop.setOnClickListener(this);
+        onPause();
     }
 
-    private void startMeasure() {
-        boolean sensorRegistered = mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        Log.d("Sensor Status:", " Sensor registered: " + (sensorRegistered ? "yes" : "no"));
-    }
-
-    private void stopMeasure() {
-        mSensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float mHeartRateFloat = event.values[0];
-
-        int mHeartRate = Math.round(mHeartRateFloat);
-
-        //mTextView.setText(Integer.toString(mHeartRate));
-        heartRateText.setText(Integer.toString(mHeartRate));
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
 
     //onResume() register the accelerometer for listening the events
     @Override
@@ -103,9 +82,18 @@ public class MainActivity extends WearableActivity implements SensorEventListene
         super.onResume();
         //sensorManager.registerListener(oriL, oriSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //sensorManager.registerListener(accL, accSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mSensorManager.registerListener(this, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(heartListener, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //sensorManager.registerListener(pedoL, pedoSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
 
+    //onPause() unregister the accelerometer for stop listening the events
+    protected void onPause() {
+        heartRateText.setText("--");
+        //sensorManager.unregisterListener(oriL);    // unregister acceleration listener
+        //sensorManager.unregisterListener(accL);    // unregister orientation listener
+        mSensorManager.unregisterListener(heartListener);    // unregister orientation listener
+        //sensorManager.unregisterListener(pedoL);
+        super.onPause();
 
     }
 
@@ -170,17 +158,12 @@ public class MainActivity extends WearableActivity implements SensorEventListene
             int mHeartRate = Math.round(mHeartRateFloat);
 
             //mTextView.setText(Integer.toString(mHeartRate));
-            heartRateText.setText(Integer.toString(mHeartRate));
+            MainActivity.this.heartRateText.setText(Integer.toString(mHeartRate));
+            sendData(mHeartRate);
         }
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSensorManager.unregisterListener(this);
     }
 
     /**
@@ -189,18 +172,6 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     private void initApi() {
         client = getGoogleApiClient(this);
         retrieveDeviceNode();
-    }
-
-    /**
-     * Sets up the button for handling click events.
-     */
-    private void setupWidgets() {
-        findViewById(R.id.btn_toast).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendToast();
-            }
-        });
     }
 
     /**
@@ -237,10 +208,23 @@ public class MainActivity extends WearableActivity implements SensorEventListene
     /**
      * Sends a message to the connected mobile device, telling it to show a Toast.
      */
-    private void sendToast() {
-        onResume();
-        Wearable.getMessageClient(this).sendMessage("message", MESSAGE, new byte[5]);
+    private void sendData(int heartRate) {
+        Wearable.getMessageClient(this).sendMessage("message", Integer.toString(heartRate), new byte[2]);
         //Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(request);
+    }
+
+    public void onClick(View v){
+        if(v == send) {
+            onResume();
+            send.setVisibility(View.INVISIBLE);
+            stop.setVisibility(View.VISIBLE);
+        }
+        else if(v == stop)
+        {
+            onPause();
+            send.setVisibility(View.VISIBLE);
+            stop.setVisibility(View.INVISIBLE);
+        }
     }
 
 }
