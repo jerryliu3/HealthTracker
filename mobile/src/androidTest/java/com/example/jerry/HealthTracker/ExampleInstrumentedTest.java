@@ -1,4 +1,4 @@
-package com.example.jerry.healthmonitor2;
+package com.example.jerry.HealthTracker;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.jerry.healthmonitor2", appContext.getPackageName());
+        assertEquals("com.example.jerry.HealthTracker", appContext.getPackageName());
     }
 }
