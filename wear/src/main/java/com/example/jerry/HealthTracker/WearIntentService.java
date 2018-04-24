@@ -46,13 +46,13 @@ public class WearIntentService extends Service {
         mHeartRateSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
         heartListener = new WearIntentService.heartListener();
         Runnable r = new Runnable() {
-            long futureTime = System.currentTimeMillis() + 5000;
+            long futureTime = System.currentTimeMillis() + 60000;
             @Override
             public void run(){
                 while(!stop){
 
                     if(System.currentTimeMillis() >= futureTime) {
-                        futureTime = System.currentTimeMillis() + 5000;
+                        futureTime = System.currentTimeMillis() + 60000;
                         mSensorManager.registerListener(heartListener, mHeartRateSensor, SensorManager.SENSOR_DELAY_NORMAL);
                     }
                 }

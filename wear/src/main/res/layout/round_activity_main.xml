@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_marginTop = "5dp"
         android:layout_above = "@id/bpmText"
         android:text="--"
         android:textColor="@color/red"
@@ -29,8 +29,8 @@
         android:textSize="15dp"/>
     <Button
         android:id="@+id/btn_send"
-        android:layout_width="101dp"
-        android:layout_height="67dp"
+        android:layout_width="141dp"
+        android:layout_height="37dp"
         android:layout_gravity="center"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
@@ -40,11 +40,32 @@
     <Button
         android:id="@+id/btn_stop"
         android:layout_width="101dp"
-        android:layout_height="67dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
         android:text="Stop data"
-        android:visibility="invisible"
+        android:textSize="15dp"
+        android:visibility="invisible" />
+
+    <Switch
+        android:id="@+id/toggleIntent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/btn_send"
+        android:layout_marginBottom="50dp"
+        android:checked = "false"
+        android:textColor = "@android:color/black"
+        android:text="BG send" />
+
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="101dp"
+        android:onClick="finish"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:text="Exit"
         android:textSize="15dp" />
 </RelativeLayout>

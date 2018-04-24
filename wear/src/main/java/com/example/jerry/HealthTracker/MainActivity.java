@@ -13,7 +13,10 @@ import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
@@ -36,6 +39,9 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
 
     private Button send;
     private Button stop;
+    private Switch toggleIntent;
+    private boolean intentOn;
+    private Button exit;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +61,21 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
         send.setOnClickListener(this);
         stop = (Button) findViewById(R.id.btn_stop);
         stop.setOnClickListener(this);
+        toggleIntent = (Switch) findViewById(R.id.toggleIntent);
+        toggleIntent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked){
+                if(isChecked)
+                {
+                    intentOn = true;
+                }
+                else
+                {
+                    intentOn = false;
+                }
+            }
+        });
+        exit = (Button) findViewById(R.id.exit);
         onPause();
     }
 
@@ -78,8 +99,10 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
         //sensorManager.unregisterListener(accL);    // unregister orientation listener
         mSensorManager.unregisterListener(heartListener);    // unregister orientation listener
         //sensorManager.unregisterListener(pedoL);
-        Intent intent = new Intent(this, WearIntentService.class);
-        startService(intent);
+        if(intentOn && send.getVisibility() == View.INVISIBLE) {
+            Intent intent = new Intent(this, WearIntentService.class);
+            startService(intent);
+        }
         super.onPause();
 
     }
@@ -212,6 +235,16 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
             send.setVisibility(View.VISIBLE);
             stop.setVisibility(View.INVISIBLE);
         }
+    }
+
+    //onPause() unregister the accelerometer for stop listening the events
+    public void exit(View view)
+    {
+                //sensorManager.unregisterListener(oriL);    // unregister acceleration listener
+                //sensorManager.unregisterListener(accL);    // unregister orientation listener
+        mSensorManager.unregisterListener(heartListener);    // unregister orientation listener
+        //sensorManager.unregisterListener(pedoL);
+        finish();
     }
 
 }
