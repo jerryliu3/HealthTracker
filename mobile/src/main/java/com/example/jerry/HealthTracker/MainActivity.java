@@ -2,10 +2,12 @@ package com.example.jerry.HealthTracker;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -43,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         initApi();
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
-
     }
 
     // Check if external storage is available to read and write
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         return (Environment.MEDIA_MOUNTED.equals(state));
     }
     public void saveData(View view) {
+        Log.i("jerry.HealthTracker", "Saving data");
         try {
             String externalfilename = "HeartRateData.txt";
             if (isExternalStorageWritable()) {
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             }
             writer.flush();
             writer.close();
+            readings = new ArrayList<String>();
         }
         catch(Exception e)
         {
@@ -125,14 +127,20 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
 
     @Override
     protected void onResume() {
+        Intent intent = new Intent(this, HeartRateIntentService.class);
+        stopService(intent);
+        Log.i("jerry.HealthTracker", "Stopping service");
         super.onResume();
         Wearable.getMessageClient(this).addListener(this);
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        Log.i("jerry.HealthTracker", "On pause");
         Wearable.getMessageClient(this).removeListener(this);
+        //saveData(findViewById(android.R.id.content));
     }
 
     @Override
@@ -155,5 +163,17 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
             list.add(iterator.next());
         }
         main.setText(list.get(0).getDataItem().toString());
+    }
+    @Override
+    protected void onUserLeaveHint(){
+        onPause();
+        Log.i("jerry.HealthTracker", "On user leave hint");
+        Intent intent = new Intent(this, HeartRateIntentService.class);
+        startService(intent);
+        super.onUserLeaveHint();
+    }
+    public void exit(View view){
+
+        finish();
     }
 }

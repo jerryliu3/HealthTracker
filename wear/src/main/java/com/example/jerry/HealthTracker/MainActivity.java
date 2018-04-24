@@ -2,6 +2,7 @@ package com.example.jerry.HealthTracker;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -61,6 +62,8 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
     //onResume() register the accelerometer for listening the events
     @Override
     protected void onResume() {
+        Intent intent = new Intent(this, WearIntentService.class);
+        stopService(intent);
         super.onResume();
         //sensorManager.registerListener(oriL, oriSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //sensorManager.registerListener(accL, accSensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -75,6 +78,8 @@ public class MainActivity extends WearableActivity implements View.OnClickListen
         //sensorManager.unregisterListener(accL);    // unregister orientation listener
         mSensorManager.unregisterListener(heartListener);    // unregister orientation listener
         //sensorManager.unregisterListener(pedoL);
+        Intent intent = new Intent(this, WearIntentService.class);
+        startService(intent);
         super.onPause();
 
     }
