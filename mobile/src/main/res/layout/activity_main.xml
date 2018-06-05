@@ -63,4 +63,15 @@
         tools:layout_editor_absoluteX="141dp"
         tools:layout_editor_absoluteY="325dp" />
 
+    <Button
+        android:id="@+id/learn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Machine Learn"
+        android:onClick="learn"
+        app:layout_constraintTop_toBottomOf="@id/reset"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:layout_editor_absoluteX="141dp"
+        tools:layout_editor_absoluteY="325dp" />
 </android.support.constraint.ConstraintLayout>

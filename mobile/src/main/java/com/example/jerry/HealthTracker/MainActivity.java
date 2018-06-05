@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
     private ArrayList<String> readings;
     TextView main;
     Button exit;
+    Button learn;
     Switch toggleIntent;
     boolean intentOn = false;
     @Override
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         main = (TextView) findViewById(R.id.helloworld);
         readings = new ArrayList<String>();
         exit = (Button) findViewById(R.id.exit);
+        learn = (Button) findViewById(R.id.learn);
         toggleIntent = (Switch) findViewById(R.id.toggleIntent);
         toggleIntent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -135,6 +137,11 @@ public class MainActivity extends AppCompatActivity implements MessageClient.OnM
         {
             e.printStackTrace();
         }
+    }
+
+    public void learn(View view) {
+        Intent intent = new Intent(this, MachineLearning.class);
+        startActivity(intent);
     }
 
 
